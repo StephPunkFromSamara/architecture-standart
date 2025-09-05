@@ -1,0 +1,60 @@
+ @startuml
+ !include C4_Container.puml
+Person(client, "Клиент/Потенциальный клиент банка", "Использует интерфейс")
+Person(operatorCallCenter, "Оператор колл-центра", "Обрабатывает заявки")
+Person(backOfficer, "Сотрудник бэк-офиса", "Управляет тарификацией")
+Person(frontOfficer, "Сотрудник фронт-офиса", "Обрабатывает заявки")
+
+ System_Boundary(bank, "Bank System") {
+
+    Container(bankUI, "UI","React.js", "Композиционный слой сайта и Интернет банка")
+    Container(webSiteBank, "Интернет-Банк","php/React.js", "Страница сайта банка")
+
+    Container(gateway, "API Gateway", "Nginx / Kong", "Роутинг и аутентификация запросов")
+
+    Container(internetBankUI, "Интернет-Банк","React.js", "Система интернет банкинга")
+    Container(internetBank, "Интернет-Банк","Java Spring Boot", "Система интернет банкинга")
+    ContainerDb(internetBankDb, "Данные интернет банка", "PostgreSQL", "Хранит данные пользователей")
+
+    Container(gateway, "API Gateway", "Nginx / Kong", "Роутинг и аутентификация запросов")
+
+    Container(backOfficeAutoBankSystem, "АБС","Delphi", "Автоматизированная банковская система")
+    ContainerDb(backOfficeAutoBankSystemDb, "Данные АБС", "PostgreSQL", "Хранение данных АБС")
+
+    ContainerQueue(broker, "Брокер сообщений", "Apache Kafka", "Интеграционная шина")
+
+    Container(notificationUI, "UI-настройка оповещений","React.js", "Yастройка оповещений")
+    Container(notification, "Сервис оповещений","Java Spring Boot", "Хранение и отправка смс-оповещений")
+    ContainerDb(notificationDb, "Шаблоны оповещений", "PostgreSQL", "Хранит шаблоны оповещений")
+   }
+    System(callCenter , "Система кол-центра", "Обработка заявок")
+
+
+   Rel(client, bankUI, "Использует интерфейс", "webBrowser")
+   Rel(backOfficer, backOfficeAutoBankSystem, "Использует интерфейс", "desktopClient")
+   Rel(frontOfficer, backOfficeAutoBankSystem, "Использует интерфейс", "desktopClient")
+   Rel(operatorCallCenter, callCenter, "Использует интерфейс", "webBrowser")
+   Rel(backOfficer, notificationUI, "Использует интерфейс", "desktopClient")
+   Rel(frontOfficer, notificationUI, "Использует интерфейс", "desktopClient")
+
+   Rel(bankUI,internetBankUI, "Использует интерфейс", "API")
+   Rel(bankUI,webSiteBank, "Использует интерфейс", "API")
+
+   Rel(internetBankUI, gateway, "СRUD API internetBank", "REST API/JSON")
+   Rel(webSiteBank, gateway, "СRUD API callCenter","REST API/JSON")
+   Rel(gateway, internetBank, "СRUD API internetBank", "REST API/JSON")
+   Rel(gateway, callCenter, "СRUD API callCenter","REST API/JSON")
+   Rel(internetBank, broker, "Открытие вклада command/reply","Kafka Protocol/JSON")
+   Rel(callCenter, broker, "Заявка на открытие вклада command/reply","Kafka Protocol/JSON")
+   Rel(broker, backOfficeAutoBankSystem, "Заявка на открытие вклада command/reply","Kafka Protocol/JSON")
+   Rel(backOfficeAutoBankSystem, backOfficeAutoBankSystemDb, "Сохранение данных АБС","ADO")
+   Rel(internetBank, internetBankDb, "Сохранение данных интернет банка","JDBC")
+   Rel(notificationUI,gateway,"СRUD API notification","REST API/JSON")
+   Rel(broker,notification, "command/reply Запуск оповещения" , "Kafka Protocol/JSON")
+   Rel(gateway,notification, "СRUD API notification" , "REST API/JSON")
+   Rel(notification, notificationDb, "Сохранение данных  шаблонов уведомлений","JDBC")
+ }
+
+ @enduml
+
+

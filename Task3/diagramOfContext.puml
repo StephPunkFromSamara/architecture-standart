@@ -1,0 +1,25 @@
+@startuml
+
+!include C4_Context.puml
+
+Person(client, "Клиент/Потенциальный клиент банка", "Использует интерфейс")
+Person(operatorCallCenter, "Оператор колл-центра", "Обрабатывает заявки")
+Person(backOfficer, "Сотрудник бэк-офиса", "Управляет тарификацией")
+Person(frontOfficer, "Сотрудник фронт-офиса", "Обрабатывает заявки")
+System(internetBank, "Интернет-Банк", "Система интернет банкинга")
+System(backOfficeAutoBankSystem, "АБС", "Автоматизированная банковская система")
+System(notificationSMS, "СМС оповещения", "СМС оповещения")
+System(callCenter , "Система кол-центра", "Обработка заявок")
+
+Rel(backOfficer,backOfficeAutoBankSystem, "Использование системы АБС для управления тарифами и услугами банка")
+Rel(frontOfficer,backOfficeAutoBankSystem, "Обрабатывает заявки")
+Rel(client,internetBank, "Использование системы для заявок и открытие вкладов")
+Rel(internetBank,backOfficeAutoBankSystem, "Отправка заявок для/Открытие вклада","KAFKA:JSON Format")
+Rel(internetBank,notificationSMS, "Данные смс-оповещений","KAFKA:JSON Format")
+Rel(backOfficeAutoBankSystem,notificationSMS, "Данные смс-оповещений","KAFKA:JSON Format")
+Rel(callCenter,notificationSMS, "Данные смс-оповещений","KAFKA:JSON Format")
+Rel(callCenter,backOfficeAutoBankSystem, "Отправка заявок для открытие вклада","KAFKA:JSON Format")
+Rel(operatorCallCenter,callCenter, "Обработка заявок")
+
+@enduml
+
