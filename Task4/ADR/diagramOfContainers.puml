@@ -1,0 +1,32 @@
+ @startuml
+ !include C4_Container.puml
+Person(operatorCallCenter, "Оператор колл-центра", "Обрабатывает заявки")
+Person(backOfficer, "Сотрудник бэк-офиса", "Управляет тарификацией")
+Person(frontOfficer, "Сотрудник фронт-офиса", "Обрабатывает заявки")
+
+ System_Boundary(bank, "Bank System") {
+
+    Container(backOfficeAutoBankSystem, "АБС","Delphi", "Автоматизированная банковская система")
+    ContainerDb(backOfficeAutoBankSystemDb, "Данные АБС", "PostgreSQL", "Хранение данных АБС")
+    ContainerQueue(broker, "Брокер сообщений", "Apache Kafka", "Интеграционная шина")
+   }
+    System_Ext(callCenterPartner , "Система кол-центра", "Обработка заявок")
+    System_Ext(sftpServer , "SFTP-Server", "Сервис обмена файлами через SSH-соединения")
+    System(callCenter , "Система кол-центра", "Обработка заявок")
+
+
+
+   Rel(backOfficer, backOfficeAutoBankSystem, "Использует интерфейс", "desktopClient")
+   Rel(frontOfficer, backOfficeAutoBankSystem, "Использует интерфейс", "desktopClient")
+   Rel(operatorCallCenter, callCenter, "Использует интерфейс", "webBrowser")
+   Rel(operatorCallCenter, callCenterPartner, "Использует интерфейс", "webBrowser")
+   Rel(callCenter, broker, "Заявка на открытие вклада command/reply","Kafka Protocol/JSON")
+   Rel(broker, backOfficeAutoBankSystem, "Заявка на открытие вклада command/reply","Kafka Protocol/JSON")
+   Rel(backOfficeAutoBankSystem, backOfficeAutoBankSystemDb, "Сохранение данных АБС","ADO")
+   Rel(backOfficeAutoBankSystem, sftpServer, "Отправка данных по вклада по расписанию","SFTP Client")
+   Rel(callCenterPartner, sftpServer, "Считывание файлов по расписанию","SFTP Client")
+ }
+
+ @enduml
+
+

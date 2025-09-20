@@ -1,0 +1,19 @@
+@startuml
+
+!include C4_Context.puml
+
+
+Person(operatorCallCenter, "Оператор колл-центра", "Обрабатывает заявки")
+Person(backOfficer, "Сотрудник бэк-офиса", "Управляет тарификацией")
+System(backOfficeAutoBankSystem, "АБС", "Автоматизированная банковская система")
+System(callCenter, "Система кол-центра", "Обработка заявок")
+System_Ext(callCenterPartner , "Система партнерской кол-центра", "Обработка заявок")
+
+
+Rel(backOfficer,backOfficeAutoBankSystem, "Использование системы АБС для управления тарифами и услугами банка")
+Rel(callCenter,backOfficeAutoBankSystem, "Отправка заявок для открытие вклада","KAFKA:JSON Format")
+Rel(callCenterPartner,backOfficeAutoBankSystem, "Получение ставок и отправка заявок","SFTP:FILE")
+Rel(operatorCallCenter,callCenter, "Обработка заявок")
+Rel(operatorCallCenter,callCenterPartner, "Обработка заявок")
+@enduml
+
